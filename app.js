@@ -26,4 +26,16 @@ $(function() {
         }
     });
 
+     // ==================================================
+    // STEP 3: The Collection
+    // ADD this new section right after the Model code.
+    // This is the blueprint for the LIST of to-do items.
+    // ==================================================
+    app.TodoList = Backbone.Collection.extend({
+
+        // This part tells the list what kind of items it will hold.
+        model: app.Todo
+
+    }); // <-- The Collection definition ends here.
+
 });
