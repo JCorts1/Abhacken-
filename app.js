@@ -59,10 +59,18 @@ $(function() {
         initialize: function() {
             // Here, we create the instance of our collection that will hold the todos.
             this.collection = new app.TodoList();
+            this.$list = this.$('#todo-list'); // NEW: Cache the <ul> element.
+            this.listenTo(this.collection, 'add', this.addOne); // NEW
 
             // We also "cache" the input element so we don't have to keep looking for it.
             // The '$' prefix is a common convention for variables that hold a jQuery object.
             this.$input = this.$('#new-todo');
+        },
+
+        // NEW: The function to render a single todo item.
+        addOne: function(todo) {
+            const view = new app.TodoView({ model: todo });
+            this.$list.append(view.render().el);
         },
 
         // This function is called by our event handler.
@@ -80,6 +88,47 @@ $(function() {
 
             // Finally, clear the input field so it's ready for the next item.
             this.$input.val('');
+        }
+    });
+
+    // ===============================================
+    // STEP 5.1: THE VIEW FOR A SINGLE TO-DO ITEM
+    // ===============================================
+
+    app.TodoView = Backbone.View.extend({
+        // This view will be an `<li>` HTML tag.
+        tagName: 'li',
+
+        // Cache the template function for a single item.
+        template: _.template($('#item-template').html()),
+
+        // The DOM events specific to an item.
+        events: {
+            'click .toggle': 'toggleCompleted',
+            'click .destroy': 'clear'
+        },
+
+        // The TodoView listens for changes to its model, re-rendering itself.
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'destroy', this.remove); // When the model is destroyed, remove the view.
+        },
+
+        // Render the view.
+        render: function() {
+            this.$el.html(this.template(this.model.toJSON()));
+            this.$el.toggleClass('completed', this.model.get('completed'));
+            return this;
+        },
+
+        // Toggle the `"completed"` state of the model.
+        toggleCompleted: function() {
+            this.model.toggle();
+        },
+
+        // Remove the item, destroying the model from the collection.
+        clear: function() {
+            this.model.destroy();
         }
     });
 
